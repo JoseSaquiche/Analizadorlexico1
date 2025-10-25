@@ -310,21 +310,30 @@ public class MainFrame extends JFrame {
    }
 
    private void analyzeCode() {
-      String code = this.codeTextArea.getText();
-      if (code.trim().isEmpty()) {
-         this.showWarning("No hay código para analizar");
-      } else {
-         try {
+    String code = this.codeTextArea.getText();
+    if (code.trim().isEmpty()) {
+        this.showWarning("No hay código para analizar");
+    } else {
+        try {
             this.statusLabel.setText(" Analizando código...");
             
-            // Aplicar resaltado de sintaxis si está disponible
-            if (SyntaxHighlighter.class != null) {
-                try {
-                    SyntaxHighlighter.applySwiftHighlighting(this.codeTextArea);
-                } catch (Exception e) {
-                    // Ignorar si no está disponible el resaltador
-                }
+            try {
+                SyntaxHighlighter.applySwiftHighlighting(this.codeTextArea);
+            } catch (Exception e) {
             }
+            
+            SwiftLexer lexer = new SwiftLexer(code);
+            List<Token> tokens = lexer.Analizar();
+            this.displayTokens(tokens);
+            this.displayErrors(lexer, tokens);
+            this.statusLabel.setText(" Análisis completado" + (lexer.tieneError() ? " - Se encontraron errores" : " - Sin errores"));
+        } catch (Exception var4) {
+            this.statusLabel.setText(" Error durante el análisis");
+            this.showError("Error durante el análisis: " + var4.getMessage());
+            var4.printStackTrace();
+        }
+    }
+   }
             
             SwiftLexer lexer = new SwiftLexer(code);
             List<Token> tokens = lexer.Analizar();
